@@ -18,26 +18,20 @@ def proxy(path):
     elif target_url.startswith('http:/') and not target_url.startswith('http://'):
         target_url = 'http://' + target_url[6:]
 
-    # Clone headers and remove host, connection, content-length, cloudflare, and browser specific ones to prevent mismatches
-    # Lowercase all keys to prevent duplicates (e.g. referer vs Referer)
+    # Clone only the Content-Type header if present (needed for POST requests)
+    # Avoid cloning other client headers to let curl_cffi send its own matching browser-like capitalized headers
     headers = {}
-    exclude_headers = {
-        'host', 'content-length', 'connection', 'transfer-encoding',
-        'user-agent', 'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform',
-        'x-forwarded-for', 'x-real-ip', 'cf-connecting-ip', 'cf-ray', 'cf-visitor', 'cf-ew-via', 'cdn-loop',
-        'referer', 'origin'
-    }
     for k, v in request.headers.items():
-        lk = k.lower()
-        if lk not in exclude_headers:
-            headers[lk] = v
+        if k.lower() == 'content-type':
+            headers['Content-Type'] = v
+            break
 
     try:
         parsed = urlparse(target_url)
-        headers['host'] = parsed.netloc
-        headers['referer'] = f"{parsed.scheme}://{parsed.netloc}/"
+        headers['Host'] = parsed.netloc
+        headers['Referer'] = f"{parsed.scheme}://{parsed.netloc}/"
         if request.method == 'POST':
-            headers['origin'] = f"{parsed.scheme}://{parsed.netloc}"
+            headers['Origin'] = f"{parsed.scheme}://{parsed.netloc}"
     except Exception:
         pass
 
