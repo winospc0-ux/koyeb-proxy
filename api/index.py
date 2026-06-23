@@ -36,12 +36,17 @@ def proxy(path):
     except Exception:
         pass
 
+    # Determine request body data
+    req_data = request.get_data()
+    if not req_data and request.form:
+        req_data = dict(request.form)
+
     try:
         r = requests.request(
             method=request.method,
             url=target_url,
             headers=headers,
-            data=request.get_data(),
+            data=req_data,
             cookies=request.cookies,
             allow_redirects=True,
             timeout=25,
