@@ -10,7 +10,7 @@ def proxy(path):
     url = request.url
     target_idx = url.find('http', 8)
     if target_idx == -1:
-        return "Vercel Proxy is running! Usage: https://your-vercel.vercel.app/https://target-url.com/path", 200
+        return "Koyeb Proxy is running! Usage: https://your-app.koyeb.app/https://target-url.com/path", 200
 
     target_url = url[target_idx:]
     if target_url.startswith('https:/') and not target_url.startswith('https://'):
