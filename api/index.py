@@ -1,5 +1,5 @@
 from flask import Flask, request, Response
-import requests
+from curl_cffi import requests
 from urllib.parse import urlparse
 
 app = Flask(__name__)
@@ -40,12 +40,13 @@ def proxy(path):
             data=request.get_data(),
             cookies=request.cookies,
             allow_redirects=True,
-            timeout=25
+            timeout=25,
+            impersonate="chrome120"
         )
         
         # Prepare response headers, bypass hop-by-hop headers
         excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-        resp_headers = [(k, v) for k, v in r.raw.headers.items() if k.lower() not in excluded_headers]
+        resp_headers = [(k, v) for k, v in r.headers.items() if k.lower() not in excluded_headers]
         resp_headers.append(('Access-Control-Allow-Origin', '*'))
         resp_headers.append(('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS, PUT, DELETE'))
         resp_headers.append(('Access-Control-Allow-Headers', '*'))
