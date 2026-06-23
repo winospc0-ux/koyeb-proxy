@@ -18,11 +18,15 @@ def proxy(path):
     elif target_url.startswith('http:/') and not target_url.startswith('http://'):
         target_url = 'http://' + target_url[6:]
 
-    # Clone headers and remove host/cloudflare specific ones
+    # Clone headers and remove host, connection, content-length, cloudflare, and browser specific ones to prevent mismatches
     headers = {}
+    exclude_headers = {
+        'host', 'content-length', 'connection', 'transfer-encoding',
+        'user-agent', 'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform',
+        'x-forwarded-for', 'x-real-ip', 'cf-connecting-ip', 'cf-ray', 'cf-visitor', 'cf-ew-via', 'cdn-loop'
+    }
     for k, v in request.headers.items():
-        lk = k.lower()
-        if lk not in ['host', 'x-forwarded-for', 'x-real-ip', 'cf-connecting-ip', 'cf-ray', 'cf-visitor', 'cf-ew-via', 'cdn-loop']:
+        if k.lower() not in exclude_headers:
             headers[k] = v
 
     try:
