@@ -18,13 +18,14 @@ def proxy(path):
     elif target_url.startswith('http:/') and not target_url.startswith('http://'):
         target_url = 'http://' + target_url[6:]
 
-    # Clone only the Content-Type header if present (needed for POST requests)
+    # Clone only Content-Type and X-Requested-With headers if present (needed for POST requests & AJAX)
     # Avoid cloning other client headers to let curl_cffi send its own matching browser-like capitalized headers
     headers = {}
     for k, v in request.headers.items():
-        if k.lower() == 'content-type':
-            headers['Content-Type'] = v
-            break
+        lk = k.lower()
+        if lk in ['content-type', 'x-requested-with']:
+            normalized_key = 'Content-Type' if lk == 'content-type' else 'X-Requested-With'
+            headers[normalized_key] = v
 
     try:
         parsed = urlparse(target_url)
